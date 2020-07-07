@@ -39,9 +39,34 @@
   [:section.section>div.container>div.content
    [:img {:src "/img/warning_clojure.png"}]])
 
+(def equation (r/atom {:x 0 :y 0 :total 0}))
+
+(defn set-total [val]
+  (swap! equation assoc :total val))
+
+(defn do-math* []
+  (POST "/api/math/plus"
+        {:headers {"Accept" "application/transit+json"}
+         :params  {:x (:x @equation) :y (:y @equation)}
+         :handler #(set-total (:total %))}))
+
 
 (defn home-page []
-  [:p "STRING MEEE"])
+  [:div {:style {:width "100%" :height "100%"}}
+   [:p.title "Hellooooo Sample 1!!"]
+   [:div
+    [:input.text {:placeholder (:x @equation)
+                  :on-change #(swap! equation assoc :x (js/parseInt (-> % .-target .-value)))}]
+
+    [:span "  +  "]
+
+    [:input.text {:placeholder (:y @equation)
+                  :on-change #(swap! equation assoc :y (js/parseInt (-> % .-target .-value)))}]
+
+    [:button {:style {:margin "5px"}
+              :on-click #(do-math*)} "   =   " ]
+
+    [:input.text {:readOnly true :value (:total @equation)}]]])
 
 (def pages
   {:home #'home-page
