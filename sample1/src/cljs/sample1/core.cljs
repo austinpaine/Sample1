@@ -19,7 +19,7 @@
     :class (when (= page (:page @session)) "is-active")}
    title])
 
-(defn navbar [] 
+(defn navbar []
   (r/with-let [expanded? (r/atom false)]
     [:nav.navbar.is-info>div.container
      [:div.navbar-brand
@@ -39,12 +39,12 @@
   [:section.section>div.container>div.content
    [:img {:src "/img/warning_clojure.png"}]])
 
-(def equation (r/atom {:x 0 :y 0 :total 0}))
+(defonce equation (r/atom {:x 0 :y 0 :total 0}))
 
 (defn set-total [val]
-  (swap! equation assoc :total val))
+  (swap! equation assoc :total val))   ;;play with assoc in the repl. this swap call is essentially (assoc @equation :total val)
 
-(defn do-math* []
+(defn do-math* []     ;; no parameters because I just go get my :x and :y values by keyword out of the equation atom
   (POST "/api/math/plus"
         {:headers {"Accept" "application/transit+json"}
          :params  {:x (:x @equation) :y (:y @equation)}
@@ -55,18 +55,20 @@
   [:div {:style {:width "100%" :height "100%"}}
    [:p.title "Hellooooo Sample 1!!"]
    [:div
-    [:input.text {:placeholder (:x @equation)
+    [:input.text {:placeholder (:x @equation)   ;; you can think of the keyword :x here as a "function" call, to get
+                                                ;; the value of :x out of the equation map.  test this in the repl!!
                   :on-change #(swap! equation assoc :x (js/parseInt (-> % .-target .-value)))}]
 
     [:span "  +  "]
 
-    [:input.text {:placeholder (:y @equation)
+    [:input.text {:placeholder (:y @equation)       ;; placeholder is just the nice greyed out hint, :value works very similarly
                   :on-change #(swap! equation assoc :y (js/parseInt (-> % .-target .-value)))}]
 
     [:button {:style {:margin "5px"}
               :on-click #(do-math*)} "   =   " ]
 
-    [:input.text {:readOnly true :value (:total @equation)}]]])
+    [:input.text {:readOnly true
+                  :value (:total @equation)}]]])
 
 (def pages
   {:home #'home-page
